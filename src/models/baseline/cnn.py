@@ -11,6 +11,7 @@ class BaselineCNN(nn.Module):
     self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
     self.fc = nn.Linear(32 * 64 * 64, 1)
 
+
   def forward(self, x):
     # Apply two pooling layers
     x = self.pool1(
@@ -26,7 +27,7 @@ class BaselineCNN(nn.Module):
 
     x = x.view(-1, 32 * 64 * 64)  # Flatten after pooling
 
-    x = torch.relu(
-      self.fc(x)
+    x = self.fc(
+      torch.relu(x)
     )  # Pass the flattened input through the fully connected layer
     return x
