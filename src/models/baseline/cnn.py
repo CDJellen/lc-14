@@ -9,24 +9,19 @@ class BaselineCNN(nn.Module):
     self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
     self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
     self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
-    self.fc = nn.Linear(32 * 64 * 64, 1)
+
+    self.fc1 = nn.Linear(64 * 64 * 32, 128)
+    self.relu = nn.ReLU()
+    self.fc2 = nn.Linear(128, 1)
 
   def forward(self, x):
-    # Apply two pooling layers
-    x = self.pool1(
-      torch.relu(
-        self.conv1(x)  # Pass the input through the first convolutional layer
-      )  # Apply the ReLU activation function to the output of the first convolutional layer
-    )  # Apply the first pooling layer
-    x = self.pool2(
-      torch.relu(
-        self.conv2(x)  # Pass the output of the first convolutional layer through the second convolutional layer}
-      )  # Apply the ReLU activation function to the output of the second convolutional layer
-    )  # Apply the second pooling layer
+    x = self.pool1(self.relu(self.conv1(x)))
+    x = self.pool2(self.relu(self.conv2(x)))
 
-    x = x.view(-1, 32 * 64 * 64)  # Flatten after pooling
+    x = x.view(-1, 32 * 64 * 64)  # Flatten the tensor
 
-    x = torch.relu(
-      self.fc(x)
-    )  # Pass the flattened input through the fully connected layer
+    x = self.relu(self.fc1(x))
+    x = self.fc2(x)
+
     return x
+  

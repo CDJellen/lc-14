@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -16,7 +18,8 @@ def collate_fn(
 
 def get_dataloader(
   image_dir: str,
-  labels_fp: str,
+  labels_fp: Optional[str] = None,
+  extension: str = ".jpg",
   transformations: transforms.Compose = None,
   mode: str = "train",
   train_frac: float = 0.8,
@@ -49,6 +52,7 @@ def get_dataloader(
     train_frac=train_frac,
     val_frac=val_frac,
     seed=seed,
+    extension=extension,
   )
 
   dataloader = DataLoader(

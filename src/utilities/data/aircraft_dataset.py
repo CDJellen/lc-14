@@ -1,6 +1,6 @@
 import os
 from glob import glob
-from typing import List, Callable
+from typing import List, Callable, Optional
 
 import torch
 import pandas as pd
@@ -19,12 +19,13 @@ class AircraftDataset(Dataset):
   def __init__(
     self,
     image_dir: str,
-    labels_fp: str,
+    labels_fp: Optional[str] = None,
     transformations: List[Callable] = None,
     mode: str = "train",
     train_frac: float = 0.8,
     val_frac: float = 0.1,
-    seed: int = 2020,  
+    seed: int = 2020,
+    extension: str = ".jpg"
   ) -> None:
     """
     Initializes the dataset.
@@ -36,14 +37,14 @@ class AircraftDataset(Dataset):
     """
     if mode not in ["train", "val", "test"]:
       raise ValueError("Invalid mode. Must be one of 'train', 'val', or 'test'.")
-    if train_frac + val_frac >= 1:
+    if train_frac + val_frac > 1:
       raise ValueError("train_frac + val_frac must be less than 1.")
     
     if not transformations:
       transformations = A.Compose([
         ToTensorV2(),
       ])
-    self.image_filepaths = list(sorted(glob(os.path.join(image_dir, "*.jpg"))))  # get all files with the .jpg extension
+    self.image_filepaths = list(sorted(glob(os.path.join(image_dir, f"*{extension}"))))  # get all files with the .jpg extension
     np.random.seed(seed)
     np.random.shuffle(self.image_filepaths)
 
@@ -56,7 +57,10 @@ class AircraftDataset(Dataset):
     self.val_image_filepaths = self.image_filepaths[train_end:val_end]
     self.test_image_filepaths = self.image_filepaths[val_end:]
 
-    self.labels_df = pd.read_csv(labels_fp, converters={'geometry':lambda x:list(eval(x))})  # parse the list of tuples from string literal
+    if labels_fp:
+      self.labels_df = pd.read_csv(labels_fp, converters={'geometry':lambda x:list(eval(x))})  # parse the list of tuples from string literal
+    else:
+      self.labels_df = None
 
     self.transformations = transformations
 
@@ -91,9 +95,12 @@ class AircraftDataset(Dataset):
     # Load image
     image = Image.open(img_path).convert("RGB")
 
-    # Get count of aircraft for the current image
-    annotations = self.labels_df[(self.labels_df['image_id'] == img_name) & (self.labels_df['class'] == "Airplane")]
-    count = len(annotations)
+    # Get count of aircraft for the current image if labels are provided
+    if self.labels_df is not None:
+      annotations = self.labels_df[(self.labels_df['image_id'] == img_name) & (self.labels_df['class'] == "Airplane")]
+      count = len(annotations)
+    else:
+      count = -1
 
     # Convert count to a PyTorch tensor
     count = torch.tensor(count, dtype=torch.float32)  # Use float for regression
