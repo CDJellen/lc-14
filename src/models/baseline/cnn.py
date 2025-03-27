@@ -20,8 +20,8 @@ class BaselineCNN(nn.Module):
 
     x = x.view(-1, 32 * 64 * 64)  # Flatten the tensor
 
-    x = self.relu(self.fc1(x))
-    x = self.fc2(x)
+    x = self.fc1(self.relu(x))
+    x = self.fc2(self.relu(x))
 
     return x
   
