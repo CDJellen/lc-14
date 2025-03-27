@@ -44,6 +44,7 @@ class AircraftDataset(Dataset):
       transformations = A.Compose([
         ToTensorV2(),
       ])
+
     self.image_filepaths = list(sorted(glob(os.path.join(image_dir, f"*{extension}"))))  # get all files with the .jpg extension
     np.random.seed(seed)
     np.random.shuffle(self.image_filepaths)
