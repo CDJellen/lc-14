@@ -25,7 +25,7 @@ class AlphaModel(nn.Module):
     self.pool4 = nn.MaxPool2d(kernel_size=2, stride=2)
 
     # Fully connected layers
-    self.fc1 = nn.Linear(128 * 16 * 16, 256)  # Adjust for the feature map size after pooling
+    self.fc1 = nn.Linear(128 * 32 * 32, 256)  # Adjust for the feature map size after pooling
     self.relu5 = nn.ReLU()
     self.fc2 = nn.Linear(256, 128)
     self.fc3 = nn.Linear(128, 1)  # Final output layer
